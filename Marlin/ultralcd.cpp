@@ -65,6 +65,7 @@ static void lcd_status_screen();
   static void led_off();
   static void tiaoping();
   static void next();
+  static void reseted();
 
   #if ENABLED(HAS_LCD_CONTRAST)
     static void lcd_set_contrast();
@@ -1192,6 +1193,12 @@ static void lcd_filament_change1(){
 	enqueuecommands_P(PSTR("T1"));
 }
 
+void reseted()
+{
+   Config_ResetDefault();
+   lcd_return_to_status(); 
+}
+
 static void led(){
   START_MENU();
   MENU_ITEM(back, msg_main(), lcd_main_menu);
@@ -1326,6 +1333,7 @@ static void lcd_control_menu() {
     MENU_ITEM(function, msg_store_eprom(), Config_StoreSettings);
     MENU_ITEM(function, msg_load_eprom(), Config_RetrieveSettings);
   #endif*/
+  MENU_ITEM(function, msg_restore_failsafe(), reseted);
   END_MENU();
 }
 
