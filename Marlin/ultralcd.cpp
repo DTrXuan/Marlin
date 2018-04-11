@@ -60,6 +60,9 @@ static void lcd_status_screen();
   //��ʾ�˵�
   static void lcd_filament_change0();
   static void lcd_filament_change1();
+  static void led();
+  static void led_on();
+  static void led_off();
   static void tiaoping();
   static void next();
 
@@ -339,6 +342,7 @@ static void lcd_status_screen() {
     }
 
     if (current_click) {
+      digitalWrite (LED,HIGH);
       lcd_goto_menu(lcd_main_menu, true);
       lcd_implementation_init( // to maybe revive the LCD if static electricity killed it.
         #if ENABLED(LCD_PROGRESS_BAR)
@@ -553,6 +557,8 @@ static void lcd_main_menu() {
     }
   #endif //SDSUPPORT
 
+ // MENU_ITEM(submenu, msg_led(), led);
+  
   END_MENU();
 }
 
@@ -1186,6 +1192,42 @@ static void lcd_filament_change1(){
 	enqueuecommands_P(PSTR("T1"));
 }
 
+static void led(){
+  START_MENU();
+  MENU_ITEM(back, msg_main(), lcd_main_menu);
+  MENU_ITEM(function, msg_led_on(), led_on);
+  MENU_ITEM(function, msg_led_off(), led_off);
+  END_MENU();
+  
+  }
+void led_on(){
+ // START_MENU();
+ // MENU_ITEM(back, "ON" , lcd_status_screen);
+ // END_MENU();
+
+ digitalWrite (LED,HIGH); 
+ lcd_return_to_status(); 
+  
+  }
+
+void led_off(){
+ // START_MENU();
+ // MENU_ITEM(back, "OFF" , lcd_status_screen);
+ // END_MENU();
+
+digitalWrite (LED,LOW); 
+lcd_return_to_status(); 
+  
+  }
+/*if (millis() > led_auto_off)
+      {
+        lcd_return_to_status();
+        lcdDrawUpdate = 2;
+    //    return_to_status_ms = ms + LCD_TIMEOUT_TO_STATUS;
+    //    led_auto_off = ms + led_off_time ;
+       digitalWrite (LED,LOW);
+      }*/
+
   static void tiaoping(){
   START_MENU();
   MENU_ITEM(back, msg_prepare(), lcd_prepare_menu);
@@ -1250,7 +1292,16 @@ void next(){
  //lcd_return_to_status(); 
   
   }
+/*void led_off(){
+ // START_MENU();
+ // MENU_ITEM(back, "OFF" , lcd_status_screen);
+ // END_MENU();
 
+digitalWrite (LED,LOW); 
+lcd_return_to_status(); 
+  
+  }*/
+  
 /**
  *
  * "Control" submenu
@@ -1931,7 +1982,7 @@ void lcd_update() {
   #if ENABLED(ULTIPANEL)
     static millis_t return_to_status_ms = 0;
   #endif
-
+    static millis_t led_auto_off = 0;
   lcd_buttons_update();
 
   #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
@@ -2027,6 +2078,7 @@ void lcd_update() {
           encoderDiff = 0;
         }
         return_to_status_ms = ms + LCD_TIMEOUT_TO_STATUS;
+        led_auto_off = ms + led_off_time ;
         lcdDrawUpdate = 1;
       }
     #endif //ULTIPANEL
@@ -2078,6 +2130,15 @@ void lcd_update() {
 
     #endif // ULTIPANEL
 
+        if ( millis() > led_auto_off)
+         {
+              //lcd_return_to_status();
+             // lcdDrawUpdate = 2;
+              digitalWrite (LED,LOW);
+              
+         }
+
+      
     if (lcdDrawUpdate == 2) lcd_implementation_clear();
     if (lcdDrawUpdate) lcdDrawUpdate--;
     next_lcd_update_ms = ms + LCD_UPDATE_INTERVAL;

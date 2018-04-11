@@ -34,6 +34,7 @@
 
   #define LCD_UPDATE_INTERVAL 100
   #define LCD_TIMEOUT_TO_STATUS 120000
+  #define led_off_time 180000
 
   #if ENABLED(ULTIPANEL)
     void lcd_buttons_update();
