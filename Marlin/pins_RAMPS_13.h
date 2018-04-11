@@ -33,6 +33,7 @@
 #else
   #define SERVO0_PIN        7 // RAMPS_13 // Will conflict with BTN_EN2 on LCD_I2C_VIKI
 #endif
+#define CHECK_MATWEIAL		2
 #define SERVO1_PIN          6
 #define SERVO2_PIN          5
 #define SERVO3_PIN          4

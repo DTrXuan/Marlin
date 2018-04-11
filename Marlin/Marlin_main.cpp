@@ -940,6 +940,13 @@ void setup() {
     pinMode(STAT_LED_BLUE, OUTPUT);
     digitalWrite(STAT_LED_BLUE, LOW); // turn it off
   #endif
+	//设置检测材料的引脚 translation: Set the pin for the test material
+	pinMode(CHECK_MATWEIAL, INPUT);
+    digitalWrite(CHECK_MATWEIAL, HIGH); // turn it off
+
+	//设置检测材料的引脚 translation: Set the pin for the test material
+//	pinMode(65, OUTPUT);
+//    digitalWrite(65, LOW); // turn it off
 
 	//设置电源开关引脚 translation: Set the power switch pin
 /*	pinMode(IN_PUT, INPUT);

@@ -57,6 +57,9 @@ static void lcd_status_screen();
   static void lcd_control_temperature_preheat_abs_settings_menu();
   static void lcd_control_motion_menu();
   static void lcd_control_volumetric_menu();
+  //��ʾ�˵�
+  static void lcd_filament_change0();
+  static void lcd_filament_change1();
 
   #if ENABLED(HAS_LCD_CONTRAST)
     static void lcd_set_contrast();
@@ -412,6 +415,8 @@ int mytempbed=0;
 
   static void lcd_sdcard_resume() 
   {
+    if(0==READ(CHECK_MATWEIAL))
+    {
       char cmd1[30];
       #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
     	if (power_off_commands_count > 0) {
@@ -438,6 +443,7 @@ int mytempbed=0;
       #endif
   
       card.startFileprint();
+    }
   }
 
   static void lcd_sdcard_stop() {
@@ -849,6 +855,62 @@ void lcd_japanese() {
   reboot();
 }
 
+
+void lcd_filament_load0(){ 
+
+	//START_MENU();
+//	MENU_ITEM(back, "\x9f\xc4 ...", lcd_status_screen); //������һ��˵�prepare
+//	MENU_ITEM(back, "\xfc\xfd\xb8\x9e\xfe\xff" , lcd_status_screen);
+//	MENU_ITEM(back, "the extruder1..." , lcd_status_screen);
+//	END_MENU();
+
+	enqueuecommands_P((PSTR("G92  E0")));
+	enqueuecommands_P((PSTR("M109 S205"))); // ����190�
+//	WRITE(E0_DIR_PIN, HIGH);
+	enqueuecommands_P((PSTR("G1 F150 E150")));	//����
+  lcd_return_to_status(); 
+}
+void lcd_filament_load1(){ 
+
+	START_MENU();
+	MENU_ITEM(back, PSTR("Wait for the fila-"), lcd_status_screen); //������һ��˵�prepare
+	MENU_ITEM(back, PSTR("ment to comes out of"), lcd_status_screen);
+	MENU_ITEM(back, PSTR("the extruder2..."), lcd_status_screen);
+	END_MENU();
+
+	enqueuecommands_P((PSTR("M109 S205"))); // ����190�
+	WRITE(E1_DIR_PIN, HIGH);
+	enqueuecommands_P((PSTR("G1 F200 E100")));	//����
+}
+//�Զ�����
+void lcd_filament_unload0(){
+	//START_MENU();
+//	MENU_ITEM(back, "Wait for the fila-", lcd_status_screen); //������һ��˵�prepare
+//	MENU_ITEM(back, "ment to exit from" , lcd_status_screen);
+	//MENU_ITEM(back, "\x9f\xc4 ...", lcd_status_screen); //������һ��˵�prepare
+//	MENU_ITEM(back, "\xfc\xfd\x9d\x9e\xfe\xff" , lcd_status_screen);
+//	MENU_ITEM(back, "the extruder1..." , lcd_status_screen);
+	//END_MENU();
+
+	enqueuecommands_P((PSTR("G92  E0")));
+	enqueuecommands_P((PSTR("M109 S210"))); // ����190��
+//	WRITE(E0_DIR_PIN, LOW);
+  enqueuecommands_P((PSTR("G1 F100 E15")));
+	enqueuecommands_P((PSTR("G1 F500 E-100")));	//����
+  lcd_return_to_status(); 
+}
+//�Զ�����
+void lcd_filament_unload1(){
+	START_MENU();
+	MENU_ITEM(back, PSTR("Wait for the fila-"), lcd_status_screen); //������һ��˵�prepare
+	MENU_ITEM(back, PSTR("ment to exit from"), lcd_status_screen);
+	MENU_ITEM(back, PSTR("the extruder2..."), lcd_status_screen);
+	END_MENU();
+
+	enqueuecommands_P((PSTR("M109 S210"))); // ����190�
+	WRITE(E1_DIR_PIN, LOW);
+	enqueuecommands_P((PSTR("G1 F20000 E150")));	//����
+}
 /**
  *
  * "Prepare" submenu
@@ -894,6 +956,9 @@ static void lcd_prepare_menu() {
   //�رյ��
   MENU_ITEM(gcode, msg_disable_steppers(), PSTR("M84"));
 
+  //�Զ�����
+ // MENU_ITEM(submenu, msg_filamentchange(), lcd_filament_change0);
+//  MENU_ITEM(submenu, MSG_FILAMENTCHANGE "2", lcd_filament_change1);
   //
   // Preheat PLA
   // Preheat ABS
@@ -1091,6 +1156,30 @@ static void lcd_move_menu() {
   MENU_ITEM(submenu, msg_move_01mm(), lcd_move_menu_01mm);
   //TODO:X,Y,Z,E
   END_MENU();
+}
+
+
+//�Զ�����
+static void lcd_filament_change0(){
+	START_MENU();
+	MENU_ITEM(back, msg_prepare(), lcd_prepare_menu); //������һ��˵�prepare
+	MENU_ITEM(function, msg_load(), lcd_filament_load0);
+	MENU_ITEM(function, msg_unload(), lcd_filament_unload0);
+	END_MENU();
+	enqueuecommands_P(PSTR("G82"));
+	enqueuecommands_P(PSTR("G92 E0"));	//置零
+	enqueuecommands_P(PSTR("T0"));
+}
+
+static void lcd_filament_change1(){
+	START_MENU();
+	MENU_ITEM(back, msg_prepare(), lcd_prepare_menu); //������һ��˵�prepare
+	MENU_ITEM(submenu, msg_load(), lcd_filament_load1);
+	MENU_ITEM(submenu, msg_unload(), lcd_filament_unload1);
+	END_MENU();
+	enqueuecommands_P(PSTR("G82"));
+	enqueuecommands_P(PSTR("G92 E0"));	//置零
+	enqueuecommands_P(PSTR("T1"));
 }
 
 /**
@@ -1755,6 +1844,21 @@ void lcd_update() {
 		//WRITE(OUT_PUT,HIGH);
 //	}
 	//�������Ƿ���
+	if(true==card.sdprinting )
+	{
+		if(1==READ(CHECK_MATWEIAL))
+		{
+			checknum++;
+			if(checknum>10)
+			{
+			//������ͷ���ȴ�����
+			lcd_sdcard_pause();
+		    LCD_MESSAGEPGM("Err: Change Filament");
+			//���¼���
+			checknum=0;
+			}
+		}
+	}
   #if ENABLED(ULTIPANEL)
     static millis_t return_to_status_ms = 0;
   #endif
