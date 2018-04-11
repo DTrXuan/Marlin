@@ -259,6 +259,28 @@ void* editValue;
 int32_t minEditValue, maxEditValue;
 menuFunc_t callbackFunc;
 
+// lcd auto ho0me
+static void lcd_autohome()
+{
+	//���Z��С��10����,��������10����,�ٹ���.
+/*	if(current_position[Z_AXIS]<10)
+	{
+	//	destination[Z_AXIS]=
+		current_position[Z_AXIS]+=10;
+		plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS] , current_position[E_AXIS], manual_feedrate[X_AXIS]/60, active_extruder);
+	}
+*/	
+	//��ԭ��
+	enqueuecommands_P((PSTR("G28"))); // move all axis home
+//	PSTR("G28");
+	//�رղ������
+//	PSTR("M84");
+//	enqueuecommands_P((PSTR("M84"))); // close
+	//�ر�X Y�������
+	disable_x();
+    disable_y();
+}
+
 // place-holders for Ki and Kd edits
 float raw_Ki, raw_Kd;
 
@@ -1032,7 +1054,8 @@ inline void line_to_current(AxisEnum axis) {
     calculate_delta(current_position);
     plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS], manual_feedrate[axis]/60, active_extruder);
   #else
-    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], manual_feedrate[axis]/60, active_extruder);
+ //   plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], manual_feedrate[axis]/60, active_extruder);
+	plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], manual_feedrate[axis]/60, active_extruder);
   #endif
 }
 
@@ -1913,7 +1936,7 @@ void lcd_init() {
 
   #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
     pinMode(SD_DETECT_PIN, INPUT);
-    WRITE(SD_DETECT_PIN, HIGH);
+    WRITE(SD_DETECT_PIN, LOW);
     lcd_sd_status = 2; // UNKNOWN
   #endif
 
