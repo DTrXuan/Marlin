@@ -46,6 +46,7 @@ static void lcd_status_screen();
   #endif
   const float manual_feedrate[] = MANUAL_FEEDRATE;
   static void lcd_main_menu();
+  static void lcd_resume_ok_menu();
   static void lcd_tune_menu();
   static void lcd_prepare_menu();
   static void lcd_move_menu();
@@ -378,20 +379,116 @@ static void lcd_return_to_status() { lcd_goto_menu(lcd_status_screen); }
 
 #if ENABLED(SDSUPPORT)
 
-  static void lcd_sdcard_pause() { card.pauseSDPrint(); }
+int mytemphot=0;
+int mytempbed=0;
+//float myE0=0;
 
-  static void lcd_sdcard_resume() { card.startFileprint(); }
+  static void lcd_sdcard_pause() 
+  { 
+	uint8_t tmp1_extruder;
+//	mytemphot=(int)degHotend(tmp1_extruder);
+//	mytempbed=degBed();
+	//��ͣ��ӡ
+	card.pauseSDPrint();
+	//���漷��ͷ���ȴ�Ŀ���¶�
+	mytemphot=target_temperature[0];
+	mytempbed=target_temperature_bed;
+	//����E0������
+//	myE0=current_position[E_AXIS];
+	//������ͷ���ȴ�����
+	setTargetHotend0(0);
+	setTargetBed(0);
+    
+	//��X,Y���ԭ��
+//	enquecommand_P(PSTR("G28 X0 Y0")); 
+	enqueuecommands_P(PSTR("G28 X0 Y0")); 
+	//�رղ������
+//	enqueuecommands_P(PSTR("M84")); // close
+	//�ر�X Y�������
+	disable_x();
+    disable_y();
+	//  card.pauseSDPrint(); 
+  }
+
+  static void lcd_sdcard_resume() 
+  {
+      char cmd1[30];
+      #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+    	if (power_off_commands_count > 0) {
+    		sprintf_P(cmd1, PSTR("M190 S%i"), power_off_info.target_temperature_bed);
+    		enqueuecommand(cmd1);
+    		sprintf_P(cmd1, PSTR("M109 S%i"), power_off_info.target_temperature[0]);
+    		enqueuecommand(cmd1);
+    		enqueuecommands_P(PSTR("M106 S255"));
+        	power_off_type_yes = 1;
+    	}
+    	else {
+    		sprintf_P(cmd1, PSTR("M140 S%i"), mytempbed);
+    		enqueuecommand(cmd1);
+    		sprintf_P(cmd1, PSTR("M109 S%i"), mytemphot);
+    		enqueuecommand(cmd1);
+    		enqueuecommands_P(PSTR("G28 X0 Y0"));
+    	}
+      #else
+      sprintf_P(cmd1, PSTR("M140 S%i"), mytempbed);
+      enqueuecommand(cmd1);
+      sprintf_P(cmd1, PSTR("M109 S%i"), mytemphot);
+      enqueuecommand(cmd1);
+      enqueuecommands_P(PSTR("G28 X0 Y0"));
+      #endif
+  
+      card.startFileprint();
+  }
 
   static void lcd_sdcard_stop() {
     quickStop();
     card.sdprinting = false;
     card.closefile();
+    #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+    card.openPowerOffFile(power_off_info.power_off_filename, O_CREAT | O_WRITE | O_TRUNC | O_SYNC);
+    power_off_info.valid_head = 0;
+    power_off_info.valid_foot = 0;
+    if (card.savePowerOffInfo(&power_off_info, sizeof(power_off_info)) == -1){
+      SERIAL_PROTOCOLLN("Stop to Write power off file failed.");
+    }
+    card.closePowerOffFile();
+    power_off_commands_count = 0;
+    #endif
     autotempShutdown();
     cancel_heatup = true;
     lcd_setstatus(MSG_PRINT_ABORTED, true);
   }
+  
+  static void lcd_sdcard_resume_return()
+{
+	lcd_sdcard_resume();
+	lcd_return_to_status();
+}
+  static void lcd_sdcard_stop_return() 
+{
+	lcd_sdcard_stop();
+	lcd_return_to_status();
+}
+  static void msg_resume_print_ok_title() {
+    return;
+  }
 
 #endif //SDSUPPORT
+
+/**
+ *
+ * "Resume yes or no" menu
+ *
+ */
+#if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+static void lcd_resume_ok_menu() {
+  START_MENU();
+  MENU_ITEM(function, msg_resume_print_ok(), msg_resume_print_ok_title);
+  MENU_ITEM(function, msg_resume_print_y(), lcd_sdcard_resume_return);
+  MENU_ITEM(function, msg_resume_print_n(), lcd_sdcard_stop_return);
+  END_MENU();
+}
+#endif
 
 /**
  *
@@ -418,6 +515,12 @@ static void lcd_main_menu() {
   #if ENABLED(SDSUPPORT)
     if (card.cardOK) {
       if (card.isFileOpen()) {
+        #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+        if (power_off_commands_count > 0) {
+          ;//MENU_ITEM(submenu, msg_resume_print_ok(), lcd_resume_ok_menu);
+        }
+        else {
+        #endif
         if (card.sdprinting)
           MENU_ITEM(function, msg_pause_print(), lcd_sdcard_pause);
         else
@@ -1639,12 +1742,30 @@ int lcd_strlen_P(const char* s) {
  *
  * Warning: This function is called from interrupt context!
  */
+bool poweroff;
+//������
+uint8_t checknum=0;
 void lcd_update() {
+
+//	if(millis()-oldtime>500)
+//	{
+	//����Դ�����Ƿ���
+	//	poweroff=READ(IN_PUT);
+	//	if(0==poweroff)
+		//WRITE(OUT_PUT,HIGH);
+//	}
+	//�������Ƿ���
   #if ENABLED(ULTIPANEL)
     static millis_t return_to_status_ms = 0;
   #endif
 
   lcd_buttons_update();
+
+  #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+    if ((power_off_type_yes == 0) && (power_off_commands_count > 0)) {
+      currentMenu = lcd_resume_ok_menu;
+    }
+  #endif
 
   #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
 
@@ -1660,6 +1781,10 @@ void lcd_update() {
       if (sd_status) {
         card.initsd();
         if (lcd_sd_status != 2) lcd_setstatuspgm(msg_sd_inserted());
+        
+        #if ENABLED(SDSUPPORT) && ENABLED(POWEROFF_SAVE_SD_FILE)
+        init_power_off_info();
+        #endif
       }
       else {
         card.release();
