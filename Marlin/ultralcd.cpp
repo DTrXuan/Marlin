@@ -60,6 +60,8 @@ static void lcd_status_screen();
   //��ʾ�˵�
   static void lcd_filament_change0();
   static void lcd_filament_change1();
+  static void tiaoping();
+  static void next();
 
   #if ENABLED(HAS_LCD_CONTRAST)
     static void lcd_set_contrast();
@@ -951,6 +953,8 @@ static void lcd_prepare_menu() {
   //
   MENU_ITEM(submenu, msg_move_axis(), lcd_move_menu);
 
+  MENU_ITEM(submenu, msg_tiaoping(), tiaoping);
+
   //
   // Disable Steppers
   //�رյ��
@@ -1181,6 +1185,71 @@ static void lcd_filament_change1(){
 	enqueuecommands_P(PSTR("G92 E0"));	//置零
 	enqueuecommands_P(PSTR("T1"));
 }
+
+  static void tiaoping(){
+  START_MENU();
+  MENU_ITEM(back, msg_prepare(), lcd_prepare_menu);
+  MENU_ITEM(function, msg_next(), next);
+//  MENU_ITEM(function, msg_led_off(), led_off);
+  END_MENU();
+  
+  }
+  int i=0;
+void next(){
+ // START_MENU();
+ // MENU_ITEM(back, "ON" , lcd_status_screen);
+ // END_MENU();
+// int i;
+ i=i+1;
+ if(i==1)
+ { 
+  // enqueuecommands_P((PSTR("M109 S200")));
+ //  enqueuecommands_P((PSTR("G1 F100 E5")));
+ //  enqueuecommands_P((PSTR("G1 F20000 E-10")));
+   enqueuecommands_P((PSTR("G28 X0 Y0 Z0"))); //全部回原点
+   enqueuecommands_P((PSTR("G1 F100 Z3;"))); //Z轴升高3MM
+   enqueuecommands_P((PSTR("G90")));//使用绝对坐标
+   enqueuecommands_P((PSTR("G1 X30 Y30 F5000")));//X,Y移动到30,30点
+   enqueuecommands_P((PSTR("G1 F100 Z-3")));//Z轴下降3mm
+ //  lcd_return_to_status();
+
+ }
+ if(i==2)
+ {
+   enqueuecommands_P((PSTR("G1 F200 Z3"))); //Z轴升高3MM
+   enqueuecommands_P((PSTR("G1 Y270 F5000")));//X,Y移动到270,30点
+   enqueuecommands_P((PSTR("G1 F200 Z-3")));//Z轴下降3mm
+ }
+ if(i==3)
+ {
+   enqueuecommands_P((PSTR("G1 F200 Z3"))); //Z轴升高3MM
+   enqueuecommands_P((PSTR("G1 X270 F5000")));//X,Y移动到270,270点
+   enqueuecommands_P((PSTR("G1 F200 Z-3")));//Z轴下降3mm
+ }
+ if(i==4)
+ {
+ enqueuecommands_P((PSTR("G1 F200 Z3"))); //Z轴升高3MM
+ enqueuecommands_P((PSTR("G1 Y30 F5000")));//X,Y移动到30,270点
+ enqueuecommands_P((PSTR("G1 F200 Z-3")));//Z轴下降3mm
+ }
+ if(i==5)
+ {
+ enqueuecommands_P((PSTR("G1 F200 Z3"))); //Z轴升高3MM
+ enqueuecommands_P((PSTR("G1 X150 Y150 F5000")));//X,Y移动到100,100点
+ enqueuecommands_P((PSTR("G1 F200 Z-3")));//Z轴下降3mm
+ }
+ if(i==6)
+ {
+ enqueuecommands_P((PSTR("G1 F200 Z3"))); //Z轴升高3MM
+ //enqueuecommands_P((PSTR("G1 X100 Y100 F5000")));//X,Y移动到100,100点
+ //enqueuecommands_P((PSTR("G1 F200 Z-3")));//Z轴下降3mm
+ i=0;
+ lcd_return_to_status();
+ }
+ 
+ //lcd_return_to_status(); 
+  
+  }
 
 /**
  *
