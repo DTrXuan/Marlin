@@ -69,6 +69,7 @@
 // 91 = Final OMCA board
 // 301 = Rambo
 // 21 = Elefu Ra Board (v3)
+// 310 = Mega Controller
 
 #ifndef MOTHERBOARD
 #define MOTHERBOARD 7
