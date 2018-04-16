@@ -99,7 +99,6 @@ struct power_off_info_t {
   /* Gcode related information. (44B + 20B = 64B) */
   float current_position[NUM_AXIS];
   float feedrate;
-  float saved_z;
   int target_temperature[4];
   int target_temperature_bed;
   //uint8_t reserved2[64-44];

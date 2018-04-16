@@ -699,18 +699,10 @@ void init_power_off_info () {
   			for (i = 0; i < BUFSIZE; i++) {
   				SERIAL_PROTOCOLLN(power_off_info.command_queue[i]);
   			}
-        char str_X[16];
-        char str_Y[16];
-        char str_Z[16];
-        char str_E[16];
-        char str_Z_up[16];
-        memset(str_Z, 0, sizeof(str_X));
-        memset(str_Z, 0, sizeof(str_Y));
+        char str_Z[16], str_E[16], str_Z_up[16];
         memset(str_Z, 0, sizeof(str_Z));
         memset(str_E, 0, sizeof(str_E));
         memset(str_Z_up, 0, sizeof(str_Z_up));
-        dtostrf(power_off_info.current_position[0], 1, 3, str_X);
-        dtostrf(power_off_info.current_position[1], 1, 3, str_Y);
         dtostrf(power_off_info.current_position[2], 1, 3, str_Z);
         dtostrf(power_off_info.current_position[2] + 5, 1, 3, str_Z_up);
         #if ENABLED(SAVE_EACH_CMD_MODE)
@@ -779,14 +771,13 @@ void save_power_off_info () {
       #if ENABLED(SAVE_EACH_CMD_MODE)
       (true)
       #else
-      ((current_position[2] > 0) && (power_off_info.saved_z != current_position[2]))
+      ((current_position[2] > 0) && (power_off_info.current_position[2] != current_position[2]))
       #endif
         //|| ((cur_time - pre_time) > SAVE_INFO_INTERVAL)
       ) {
       //pre_time = cur_time;
       //SERIAL_PROTOCOLLN("Z : ");
       //SERIAL_PROTOCOLLN(current_position[2]);
-      //SERIAL_PROTOCOLLN(power_off_info.saved_z);
       power_off_info.valid_head = random(1,256);
       power_off_info.valid_foot = power_off_info.valid_head;
 			//SERIAL_PROTOCOLLN("save valid: ");
@@ -798,8 +789,6 @@ void save_power_off_info () {
 				power_off_info.current_position[i] = current_position[i];
 				//SERIAL_PROTOCOLLN(current_position[i]);
 			}
-			power_off_info.saved_z = current_position[2];
-			//SERIAL_PROTOCOLLN(power_off_info.saved_z);
 			power_off_info.feedrate = feedrate;
 			//SERIAL_PROTOCOLLN(power_off_info.feedrate);
 			for (i = 0; i < 4; i++) {
