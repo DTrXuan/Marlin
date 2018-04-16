@@ -690,6 +690,8 @@
         #endif
 
       #endif
+      
+      
 
       #if MOTHERBOARD == 77
         #define BEEPER -1
@@ -1082,7 +1084,7 @@
 #endif
 
 #ifdef MELZI
- #define LED_PIN            27 /* On some broken versions of the Sanguino libraries the pin definitions are wrong, which then needs LED_PIN as pin 28. But you better upgrade your Sanguino libraries! See #368. */
+ #define LED_PIN            -1 /* On some broken versions of the Sanguino libraries the pin definitions are wrong, which then needs LED_PIN as pin 28. But you better upgrade your Sanguino libraries! See #368. */
  #define FAN_PIN            4 // Works for Panelolu2 too
 #endif
 
@@ -1138,9 +1140,9 @@
  #ifdef ULTRA_LCD
    #ifdef NEWPANEL
      //we have no buzzer installed
-     #define BEEPER -1
+     #define BEEPER 27
      //LCD Pins
-     #ifdef DOGLCD
+//     #ifdef DOGLCD
        // Pins for DOGM SPI LCD Support
        #define DOGLCD_A0  30
        #define DOGLCD_CS  29
@@ -1149,29 +1151,29 @@
        // Uncomment screen orientation
          // #define LCD_SCREEN_ROT_0
          // #define LCD_SCREEN_ROT_90
-       #define LCD_SCREEN_ROT_180
+      // #define LCD_SCREEN_ROT_180
          // #define LCD_SCREEN_ROT_270
-       #else // standard Hitachi LCD controller
-       #define LCD_PINS_RS        4
+ //      #else // standard Hitachi LCD controller
+       #define LCD_PINS_RS        28
        #define LCD_PINS_ENABLE    17
        #define LCD_PINS_D4        30
-       #define LCD_PINS_D5        29
-       #define LCD_PINS_D6        28
-       #define LCD_PINS_D7        27
-     #endif
+       #define LCD_PINS_D5        -1
+       #define LCD_PINS_D6        -1
+       #define LCD_PINS_D7        -1
+  //   #endif
      //The encoder and click button
      #define BTN_EN1 11
      #define BTN_EN2 10
-     #ifdef LCD_I2C_PANELOLU2
-       #ifdef MELZI
-         #define BTN_ENC 29 //the click switch
-         #define SDSS 30 //to use the SD card reader on the Panelolu2 rather than the melzi board
-       #else
-         #define BTN_ENC 30 //the click switch
-       #endif
-     #else
+//     #ifdef LCD_I2C_PANELOLU2
+//       #ifdef MELZI
+ //        #define BTN_ENC 29 //the click switch
+ //        #define SDSS 30 //to use the SD card reader on the Panelolu2 rather than the melzi board
+ //      #else
+ //        #define BTN_ENC 30 //the click switch
+ //      #endif
+ //    #else
        #define BTN_ENC 16  //the click switch
-     #endif //Panelolu2
+ //    #endif //Panelolu2
      //not connected to a pin
      #define SDCARDDETECT -1
 
@@ -1423,7 +1425,7 @@
 #define SDSS               53
 #define LED_PIN            8
 #define FAN_PIN            7
-#define PS_ON_PIN          12
+#define PS_ON_PIN          -1
 #define KILL_PIN           -1
 #define SUICIDE_PIN        -1  //PIN that has to be turned on right after start, to keep power flowing.
 #define SAFETY_TRIGGERED_PIN     28 //PIN to detect the safety circuit has triggered

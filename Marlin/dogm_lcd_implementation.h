@@ -202,8 +202,8 @@ static void lcd_implementation_status_screen()
  u8g.setColorIndex(1);	// black on white
  
  // Symbols menu graphics, animated fan
- if ((blink % 2) &&  fanSpeed )	u8g.drawBitmapP(9,1,STATUS_SCREENBYTEWIDTH,STATUS_SCREENHEIGHT,status_screen0_bmp);
-	else u8g.drawBitmapP(9,1,STATUS_SCREENBYTEWIDTH,STATUS_SCREENHEIGHT,status_screen1_bmp);
+ if ((blink % 2) &&  fanSpeed )	u8g.drawBitmapP(0,1,STATUS_SCREENBYTEWIDTH,STATUS_SCREENHEIGHT,status_screen0_bmp);
+	else u8g.drawBitmapP(0,1,STATUS_SCREENBYTEWIDTH,STATUS_SCREENHEIGHT,status_screen1_bmp);
  
  #ifdef SDSUPPORT
  //SD Card Symbol
@@ -241,17 +241,17 @@ static void lcd_implementation_status_screen()
  
  // Extruder 1
  u8g.setFont(FONT_STATUSMENU);
- u8g.setPrintPos(6,6);
+ u8g.setPrintPos(39,6);
  u8g.print(itostr3(int(degTargetHotend(0) + 0.5)));
  lcd_printPGM(PSTR(LCD_STR_DEGREE " "));
- u8g.setPrintPos(6,27);
+ u8g.setPrintPos(38,27);
  u8g.print(itostr3(int(degHotend(0) + 0.5)));
  lcd_printPGM(PSTR(LCD_STR_DEGREE " "));
- if (!isHeatingHotend(0)) u8g.drawBox(13,17,2,2);
+ if (!isHeatingHotend(0)) u8g.drawBox(13+33,16,2,2);
 	else
 		{
 		 u8g.setColorIndex(0);	// white on black
-		 u8g.drawBox(13,17,2,2);
+		 u8g.drawBox(13+33,16,2,2);
 		 u8g.setColorIndex(1);	// black on white
 		}
  
@@ -296,26 +296,26 @@ static void lcd_implementation_status_screen()
  u8g.setPrintPos(55,27);
  u8g.print("---");
  #endif
- 
+ */
  // Heatbed
  u8g.setFont(FONT_STATUSMENU);
- u8g.setPrintPos(81,6);
+ u8g.setPrintPos(81-9,6);
  u8g.print(itostr3(int(degTargetBed() + 0.5)));
  lcd_printPGM(PSTR(LCD_STR_DEGREE " "));
- u8g.setPrintPos(81,27);
+ u8g.setPrintPos(81-9,27);
  u8g.print(itostr3(int(degBed() + 0.5)));
  lcd_printPGM(PSTR(LCD_STR_DEGREE " "));
- if (!isHeatingBed()) u8g.drawBox(88,18,2,2);
+ if (!isHeatingBed()) u8g.drawBox(88-9,18,2,2);
 	else
 		{
 		 u8g.setColorIndex(0);	// white on black
-		 u8g.drawBox(88,18,2,2);
+		 u8g.drawBox(88-9,18,2,2);
 		 u8g.setColorIndex(1);	// black on white
 		}
  
  // Fan
  u8g.setFont(FONT_STATUSMENU);
- u8g.setPrintPos(104,27);
+ u8g.setPrintPos(103,27);
  #if defined(FAN_PIN) && FAN_PIN > -1
  u8g.print(itostr3(int((fanSpeed*100)/256 + 1)));
  u8g.print("%");
@@ -421,7 +421,6 @@ static void lcd_implementation_drawmenu_setting_edit_generic(uint8_t row, const 
         pstr++;
         n--;
     }
-	
 		u8g.print(':');
 
     while(n--){
@@ -446,7 +445,6 @@ static void lcd_implementation_drawmenu_setting_edit_generic_P(uint8_t row, cons
         pstr++;
         n--;
     }
-
 		u8g.print(':');
 	
     while(n--){

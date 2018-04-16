@@ -267,6 +267,7 @@ static void lcd_main_menu()
         MENU_ITEM(submenu, MSG_TUNE, lcd_tune_menu);
     }else{
         MENU_ITEM(submenu, MSG_PREPARE, lcd_prepare_menu);
+       // u8g.setFont(u8g_font_6x10_marlin);
     }
     MENU_ITEM(submenu, MSG_CONTROL, lcd_control_menu);
 #ifdef SDSUPPORT
